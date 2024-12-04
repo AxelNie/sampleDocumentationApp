@@ -25,5 +25,9 @@ jobs:
       - name: Debug .npmrc file
         run: cat ~/.npmrc | sed 's/_authToken=.*/_authToken=***HIDDEN***/'    
 
+      - name: Check npm whoami
+        run: npm whoami --registry=https://npm.pkg.github.com/
+
       - name: Publish package
-        run: npm publish
+        run: npm publish --registry=https://npm.pkg.github.com/
+      
