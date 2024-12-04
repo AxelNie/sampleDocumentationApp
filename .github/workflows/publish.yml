@@ -11,8 +11,6 @@ jobs:
     permissions:
       contents: write
       packages: write
-
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,13 +20,11 @@ jobs:
         with:
           node-version: '16'
           registry-url: 'https://npm.pkg.github.com'    
-
-      - name: Login to GitHub Package Registry
-        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
-            
-      - name: Debug .npmrc file
-        run: cat ~/.npmrc | sed 's/_authToken=.*/_authToken=***HIDDEN***/'    
-
-      - name: Publish package
-        run: npm publish --registry=https://npm.pkg.github.com/
+      - run: npm ci
+      - run: |
+          echo "@username:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       
