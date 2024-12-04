@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - 'v*'  # Matches tags starting with 'v'
 
 jobs:
   publish:
@@ -11,25 +13,42 @@ jobs:
     permissions:
       contents: write
       packages: write
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Set dynamic version
+        id: set_version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # Extract version from the tag (e.g., refs/tags/v1.2.3 -> 1.2.3)
+            VERSION=${{ github.ref#refs/tags/ }}
+            VERSION=${VERSION#v}
+          else
+            # Use GitHub run number for non-tagged runs
+            VERSION="0.1.${{ github.run_number }}"
+          fi
+
+          # Update package.json with the new version
+          jq ".version = \"$VERSION\"" package.json > tmp.json && mv tmp.json package.json
+          echo "New version set to: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
           registry-url: 'https://npm.pkg.github.com'
-          
-      # Automatically bump version
-      - name: Increment version
-        run: |
-          npm version patch --no-git-tag-version   
-      - run: npm install
+
       - run: |
-          echo "@username:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "@axelnie:registry=https://npm.pkg.github.com" >> .npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
-      - run: npm publish
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Publish package
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm publish
