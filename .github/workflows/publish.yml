@@ -8,6 +8,10 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
 
     steps:
       - name: Checkout code
@@ -20,7 +24,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'    
 
       - name: Login to GitHub Package Registry
-        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_PACKAGES_TOKEN }}" > ~/.npmrc
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
             
       - name: Debug .npmrc file
         run: cat ~/.npmrc | sed 's/_authToken=.*/_authToken=***HIDDEN***/'    
