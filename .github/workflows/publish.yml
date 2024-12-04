@@ -18,22 +18,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set dynamic version
-        id: set_version
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            # Extract version from the tag (e.g., refs/tags/v1.2.3 -> 1.2.3)
-            VERSION=$(echo "${{ github.ref }}" | sed 's|refs/tags/||' | sed 's/^v//')
-          else
-            # Use GitHub run number for non-tagged runs
-            VERSION="0.1.${{ github.run_number }}"
-          fi
-
-          # Update package.json with the new version
-          jq ".version = \"$VERSION\"" package.json > tmp.json && mv tmp.json package.json
-          echo "New version set to: $VERSION"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -46,6 +30,13 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Automated npm Release
+        uses: jsynowiec/automated-releases-for-npm-packages@v1
+        with:
+          npm-token: ${{ secrets.GITHUB_TOKEN }}
+          bump: patch  # Options: patch, minor, major
+          registry: 'https://npm.pkg.github.com/'
 
       - name: Publish package
         env:
