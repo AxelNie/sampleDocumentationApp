@@ -17,13 +17,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-          registry-url: 'https://npm.pkg.github.com'
-      
-      - name: Debug .npmrc file
-        run: cat ~/.npmrc | sed 's/_authToken=.*/_authToken=***HIDDEN***/'        
+          registry-url: 'https://npm.pkg.github.com'    
 
       - name: Login to GitHub Package Registry
         run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_PACKAGES_TOKEN }}" > ~/.npmrc
-        
+            
+      - name: Debug .npmrc file
+        run: cat ~/.npmrc | sed 's/_authToken=.*/_authToken=***HIDDEN***/'    
+
       - name: Publish package
         run: npm publish
