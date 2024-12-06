@@ -31,12 +31,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Automated npm Release
-        uses: mikeal/merge-release@v4.3.0
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Publish package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
